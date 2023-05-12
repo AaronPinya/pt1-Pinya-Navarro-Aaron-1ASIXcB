@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Botón con eventos de mouse en JavaScript</title>
+</head>
+<body>
+
+	<button id="miBoton">Haz click aquí</button>
+
+	<script>
+		var miBoton = document.getElementById("miBoton");
+
+		miBoton.addEventListener("mouseover", function(event) {
+			miBoton.innerText = "Estás encima";
+		});
+
+		miBoton.addEventListener("mouseout", function(event) {
+			miBoton.innerText = "Estás fuera";
+		});
+
+		miBoton.addEventListener("click", function(event) {
+			miBoton.innerText ="Haz hecho click en el botón";
+		});
+	</script>
+
+</body>
+</html>
