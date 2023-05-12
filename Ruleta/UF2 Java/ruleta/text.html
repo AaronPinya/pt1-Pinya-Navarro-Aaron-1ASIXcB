@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.9.1/gsap.min.js"></script>
+  <script src="gsap.min.js"></script>
   <title>Spinning Wheel</title>
 </head>
 
@@ -25,37 +25,6 @@
     <label for="dark-mode-toggle" id="dark-mode-label">Modo oscuro</label>
   </div>
   <script src="app.js"></script>
-  <div class="wrapper">
-    <h1 id="current-time" style="visibility: hidden;">00:00:00</h1>
-    <h1 id="time-left">00:00:00 </h1>
-    <div class="content">
-      <div class="column">
-        <select id="hour-select">
-          <option value="Hour" selected disabled hidden>Hora</option>
-        </select>
-      </div>
-      <div class="column">
-        <select id="minute-select">
-          <option value="Minute" selected disabled hidden>Minuto</option>
-        </select>
-      </div>
-      <div class="column">
-        <select id="ampm-select">
-          <option value="AM/PM" selected disabled hidden>AM/PM</option>
-        </select>
-      </div>
-    </div>
-    <button id="set-alarm-btn">Fijar Alarma</button>
-    <button id="start-timer-btn">Iniciar Temporizador</button>
-    <div class="sound-select-wrapper">
-      <label for="sound-select">Sonido de Alarma:</label>
-      <select id="sound-select">
-        <option value="ringtone.mp3" selected>Gofi Ringtone</option>
-        <option value="sound2.mp3">Boom</option>
-        <option value="sound3.mp3">Tu madre</option>
-      </select>
-    </div>
-  </div>
 </body>
 
 </html>

@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <script src="gsap.min.js"></script>
+  <style>
+    * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'clockicons';
+}
+
+body,
+.wrapper,
+.content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
+
+.wrapper {
+  margin: 50px;
+  width: 440px;
+  padding: 30px 30px 38px;
+  background-color: white;
+  border-radius: 20px;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0, 255, 13, 0.959);
+}
+
+.wrapper img {
+  max-width: 103px;
+}
+
+.wrapper h1 {
+  font-size: 38px;
+  font-weight: 500;
+  margin: 30px 0;
+}
+
+.wrapper .content {
+  width: 100%;
+  justify-content: space-between;
+}
+
+.content.disable {
+  cursor: no-drop;
+}
+
+.content .column {
+  padding: 0 10px;
+  border-radius: 5px;
+  border: 1px solid #15dd26;
+  width: calc(100% / 3 - 5px);
+}
+
+.content.disable .column {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.column select {
+  width: 100%;
+  height: 53px;
+  border: none;
+  outline: none;
+  background: none;
+  font-size: 19px;
+}
+
+
+
+.column select#second-select {
+  margin-top: 10px;
+}
+
+.wrapper button {
+  width: 100%;
+  color: #a3f545;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 17px 0;
+  margin-top: 20px;
+  border-radius: 5px;
+  background: #0c0c0c;
+}
+
+.hide-timer {
+  display: none;
+}
+.dark-mode {
+  /* Estilos del modo oscuro */
+  background-color: #222;
+  color: #fff;
+}
+
+/* Estilos adicionales para el modo oscuro */
+.dark-mode #current-time {
+  color: #fff;
+}
+
+.dark-mode button {
+  background-color: #555;
+  color: #fff;
+}
+
+  </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="wheel-wrapper">
+          <div id="arrow"></div>
+          <canvas id="wheelCanvas" width="500" height="500"></canvas>
+        </div>
+        <button id="spinButton">Spin the wheel</button>
+      </div>
+      <div class="switch-container">
+        <label class="switch">
+          <input type="checkbox" id="dark-mode-toggle">
+          <span class="slider round"></span>
+        </label>
+        <label for="dark-mode-toggle" id="dark-mode-label">Modo oscuro</label>
+      </div>
+      <script src="app.js"></script>
+
+  <div class="wrapper">
+    <h1 id="current-time" style="visibility: hidden;">00:00:00</h1>
+    <h1 id="time-left">00:00:00 </h1>
+    <div class="content">
+      <div class="column">
+        <select id="hour-select">
+          <option value="Hour" selected disabled hidden>Hora</option>
+        </select>
+      </div>
+      <div class="column">
+        <select id="minute-select">
+          <option value="Minute" selected disabled hidden>Minuto</option>
+        </select>
+      </div>
+      <div class="column">
+        <select id="ampm-select">
+          <option value="AM/PM" selected disabled hidden>AM/PM</option>
+        </select>
+      </div>
+    </div>
+    <button id="set-alarm-btn">Fijar Alarma</button>
+    <button id="start-timer-btn">Iniciar Temporizador</button>
+    <div class="sound-select-wrapper">
+      <label for="sound-select">Sonido de Alarma:</label>
+      <select id="sound-select">
+        <option value="ringtone.mp3" selected>Gofi Ringtone</option>
+        <option value="sound2.mp3">Boom</option>
+        <option value="sound3.mp3">Tu madre</option>
+      </select>
+    </div>
+    
+  </div>
+
+  <script>
+    const currentTime = document.querySelector("#current-time");
+const timeLeft = document.querySelector("#time-left")
+const hourSelect = document.querySelector("#hour-select");
+const minuteSelect = document.querySelector("#minute-select");
+const ampmSelect = document.querySelector("#ampm-select");
+const setAlarmBtn = document.querySelector("#set-alarm-btn");
+const startTimerBtn = document.querySelector("#start-timer-btn");
+
+let alarmTime;
+let isAlarmSet;
+let timerInterval;
+let remainingTime;
+
+const ringtone = new Audio("./files/ringtone.mp3");
+// Configuración de los selectores de hora, minuto y am/pm
+
+for (let i = 12; i > 0; i--) {
+  i = i < 10 ? `0${i}` : i;
+  let option = `<option value="${i}">${i}</option>`;
+  hourSelect.insertAdjacentHTML("beforeend", option);
+}
+
+for (let i = 59; i >= 0; i--) {
+  i = i < 10 ? `0${i}` : i;
+  let option = `<option value="${i}">${i}</option>`;
+  minuteSelect.insertAdjacentHTML("beforeend", option);
+}
+
+for (let i = 2; i > 0; i--) {
+  let ampm = i == 1 ? "AM" : "PM";
+  let option = `<option value="${ampm}">${ampm}</option>`;
+  ampmSelect.insertAdjacentHTML("beforeend", option);
+}
+
+// Actualizar el reloj en tiempo real
+
+setInterval(() => {
+  let date = new Date();
+  let h = date.getHours();
+  let m = date.getMinutes();
+  let s = date.getSeconds();
+  let ampm = "AM";
+
+  if (h >= 12) {
+    h = h - 12;
+    ampm = "PM";
+  }
+
+  h = h == 0 ? 12 : h;
+  h = h < 10 ? "0" + h : h;
+  m = m < 10 ? "0" + m : m;
+  s = s < 10 ? "0" + s : s;
+
+  timeLeft.innerText = `${h}:${m}:${s} ${ampm}`;
+
+  if (isAlarmSet && alarmTime === `${h}:${m} ${ampm}`) {
+    ringtone.play();
+    ringtone.loop = true;
+  }
+}, 1000);
+
+// Función para configurar y desactivar la alarma
+
+function setAlarm() {
+  if (isAlarmSet) {
+    alarmTime = "";
+    ringtone.pause();
+    setAlarmBtn.innerText = "Fijar Alarma";
+    isAlarmSet = false;
+  } else {
+    let time = `${hourSelect.value}:${minuteSelect.value} ${ampmSelect.value}`;
+
+    if (time.includes("Hour") || time.includes("Minute") || time.includes("AM/PM")) {
+      return alert("¡Por favor, seleccione una hora válida para configurar la alarma!");
+    }
+
+    alarmTime = time;
+    isAlarmSet = true;
+    setAlarmBtn.innerText = "Desactivar Alarma";
+  }
+}
+
+// Función para iniciar y detener el temporizador
+
+function startTimer() {
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    startTimerBtn.innerText = "Iniciar Temporizador";
+    timerInterval = null;
+    remainingTime = null;
+  } else {
+    let hours = parseInt(hourSelect.value);
+    let minutes = parseInt(minuteSelect.value);
+    let seconds = 0;
+
+    if (isNaN(hours) ||  isNaN(minutes) || isNaN(seconds) ||
+    hours < 0 || hours > 12 ||
+    minutes < 0 || minutes > 59 ||
+    seconds < 0 || seconds > 59
+  ) {
+    return alert("Por favor, seleccione una duración válida para el temporizador.");
+  }
+
+  let totalSeconds =
+    hours * 3600 +
+    minutes * 60 +
+    seconds;
+
+  remainingTime = totalSeconds;
+
+  startTimerBtn.innerText = "Detener Temporizador";
+
+  timerInterval = setInterval(updateTimer, 1000);
+}
+}
+
+// Función para actualizar el temporizador
+
+function updateTimer() {
+if (remainingTime <= 0) {
+  clearInterval(timerInterval);
+  ringtone.play();
+  ringtone.loop = true;
+  startTimerBtn.innerText = "Iniciar Temporizador";
+  timerInterval = null;
+  remainingTime = null;
+} else {
+  let hours = Math.floor(remainingTime / 3600);
+  let minutes = Math.floor((remainingTime % 3600) / 60);
+  let seconds = remainingTime % 60;
+
+  hours = hours < 10 ? "0" + hours : hours;
+  minutes = minutes < 10 ? "0" + minutes : minutes;
+  seconds = seconds < 10 ? "0" + seconds : seconds;
+  currentTime.style.visibility = "visible"
+  currentTime.innerText = `${hours}:${minutes}:${seconds}`;
+  
+  remainingTime--;
+}
+}
+
+
+
+setAlarmBtn.addEventListener("click", setAlarm);
+startTimerBtn.addEventListener("click", startTimer);
+
+
+  </script>
+</body>
+
+</html>
